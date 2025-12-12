@@ -30,7 +30,7 @@ else:
 
 
 DB_CONFIG = {
-    "host": "localhost",
+    "host": "localhost",  
     "database": "visisdb",
     "user": "zikres",
     "password": "123"

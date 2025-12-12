@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    env_file: .env
+    depends_on:
+      - db
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: visisdb
+      POSTGRES_USER: zikres
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./migrations:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
