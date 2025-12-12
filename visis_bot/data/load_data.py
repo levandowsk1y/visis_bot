@@ -3,12 +3,13 @@ import psycopg2
 import os
 
 conn = psycopg2.connect(
-    host=os.getenv("DB_HOST", "localhost"),
+    host="db",
     database="visisdb",
     user="zikres",
     password="123"
 )
 cursor = conn.cursor()
+
 
 with open("data/videos.json", "r", encoding="utf-8") as f:
     data = json.load(f)
@@ -18,8 +19,8 @@ for video in data["videos"]:
         INSERT INTO videos (
             id, creator_id, video_created_at,
             views_count, likes_count, comments_count, reports_count,
-            created_at
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            created_at, updated_at
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (id) DO UPDATE SET
             views_count = EXCLUDED.views_count,
             likes_count = EXCLUDED.likes_count,
@@ -34,7 +35,8 @@ for video in data["videos"]:
         video["likes_count"],
         video["comments_count"],
         video["reports_count"],
-        video["created_at"]
+        video["created_at"],
+        video["updated_at"]
     ))
 
 for video in data["videos"]:
@@ -58,6 +60,7 @@ for video in data["videos"]:
             snap["delta_reports_count"],
             snap["created_at"]
         ))
+
 conn.commit()
 conn.close()
 print("✅ Данные из videos.json успешно загружены в PostgreSQL")

@@ -3,6 +3,7 @@ from pathlib import Path
 from aiogram import Bot, Dispatcher
 from openai import OpenAI
 from dotenv import load_dotenv
+import time
 
 
 ROOT_DIR = Path(__file__).parent.parent
@@ -28,9 +29,8 @@ if OPENAI_API_KEY:
 else:
     print("❌ OPENAI_API_KEY не найден в .env")
 
-
 DB_CONFIG = {
-    "host": "localhost",  
+    "host": "db",  
     "database": "visisdb",
     "user": "zikres",
     "password": "123"
@@ -38,20 +38,21 @@ DB_CONFIG = {
 
 
 def test_db_connection():
-    """Проверка подключения к PostgreSQL"""
-    try:
-        import psycopg2
-        conn = psycopg2.connect(**DB_CONFIG)
-        cursor = conn.cursor()
-        cursor.execute("SELECT 1;")
-        conn.close()
-        print("✅ Подключение к базе данных PostgreSQL установлено")
-        return True
-    except Exception as e:
-        print(f"❌ Не удалось подключиться к базе данных: {e}")
-        return False
-
-
+    """Проверка подключения к PostgreSQL с повторными попытками"""
+    for attempt in range(10):
+        try:
+            import psycopg2
+            conn = psycopg2.connect(**DB_CONFIG)
+            cursor = conn.cursor()
+            cursor.execute("SELECT 1;")
+            conn.close()
+            print("✅ Подключение к базе данных PostgreSQL установлено")
+            return True
+        except Exception as e:
+            print(f"❌ Подключение не удалось (попытка {attempt + 1}): {e}")
+            time.sleep(3)  # Ждём 3 секунды перед повтором
+    print("⛔ Все попытки подключения исчерпаны.")
+    return False
 
 if TELEGRAM_TOKEN:
     try:
